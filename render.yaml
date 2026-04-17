@@ -47,7 +47,7 @@ services:
     #   - eval-pipeline.onrender.com
 
   # Celery Worker Service
-  - type: background
+  - type: worker
     name: eval-pipeline-worker
     runtime: docker
     
@@ -79,7 +79,7 @@ services:
     autoDeploy: true
 
   # Celery Beat Scheduler
-  - type: background
+  - type: worker
     name: eval-pipeline-beat
     runtime: docker
     
