@@ -36,14 +36,23 @@ from app.self_updater import SelfUpdatingService
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
-# If DATABASE_URL is not set or is a template, use default
+# If DATABASE_URL is not set or is a template, use Railway service name
 if not DATABASE_URL or DATABASE_URL.startswith("${"):
-    DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
+    # Try to use Railway's internal postgres service first
+    try:
+        # Check if postgres service is available (Railway networking)
+        DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/eval_pipeline"
+        logger.info(f"Using Railway/Docker service network: {DATABASE_URL}")
+    except Exception:
+        # Fallback to localhost (for local development)
+        DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
+        logger.info(f"Using localhost fallback: {DATABASE_URL}")
 
 # Redis/Celery configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-if REDIS_URL.startswith("${"):
-    REDIS_URL = "redis://localhost:6379"
+REDIS_URL = os.getenv("REDIS_URL", "")
+if not REDIS_URL or REDIS_URL.startswith("${"):
+    REDIS_URL = "redis://redis:6379"  # Railway service name
+    logger.info(f"Using Redis service: {REDIS_URL}")
 
 # Logging setup
 logging.basicConfig(
@@ -64,8 +73,13 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables (optional - may fail during startup if DB not ready)
+try:
+    Base.metadata.create_all(bind=engine)
+    logger.info("✓ Database tables created successfully")
+except Exception as e:
+    logger.warning(f"⚠ Could not create tables on startup (DB may not be ready yet): {e}")
+    # Tables will be created on first request or later
 
 
 def get_db() -> Session:
