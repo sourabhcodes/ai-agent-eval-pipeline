@@ -112,47 +112,36 @@ curl "$API_URL/suggestions?min_confidence=0.7&limit=5"
 4. Authorize GitHub and select your repository
 ```
 
-#### 2. Add Services Using railway.json
+#### 2. Provision Databases
 
-**Option A: Automatic (Recommended)**
-```
-1. Railway will auto-detect railway.json
-2. Click "Deploy"
-3. Services will be provisioned automatically
-```
+1. Go to your Railway project → click "+ New" → select "Database" → choose "PostgreSQL"
+   - Railway will provision a managed Postgres instance and automatically generate a `DATABASE_URL` variable.
+2. Go to your Railway project → click "+ New" → select "Database" → choose "Redis"
+   - Railway will provision a managed Redis instance and automatically generate a `REDIS_URL` variable.
 
-**Option B: Manual**
-```
-1. Create New Service
-2. Select "Database" → PostgreSQL
-   - Name: postgres
-   - Database: eval_pipeline
-3. Create New Service
-   - Select "Add Service" → "Redis"
-   - Name: redis
-4. Create New Service
-   - Select "Deploy from GitHub"
-   - Name: api
-   - Dockerfile: ./Dockerfile
-5. Create New Service
-   - Select "Deploy from GitHub"
-   - Name: worker
-   - Dockerfile: ./worker.dockerfile
-6. Create New Service
-   - Select "Deploy from GitHub"
-   - Name: beat
-   - Dockerfile: ./worker.dockerfile
-```
+#### 3. Add Application Services
 
-#### 3. Configure Environment Variables
+1. Click "+ New" → "GitHub Repo" → Select your repository
+   - This will create your API service. Go to Settings and set the start command if necessary, or just let Railway use the Dockerfile.
+   - Name it `api`.
+2. Click "+ New" → "GitHub Repo" → Select your repository AGAIN
+   - Go to Settings -> Build -> Dockerfile path, and change it to `worker.dockerfile`.
+   - Name it `worker`.
+3. Click "+ New" → "GitHub Repo" → Select your repository AGAIN
+   - Go to Settings -> Build -> Dockerfile path, and change it to `beat.dockerfile`.
+   - Name it `beat`.
+
+#### 4. Configure Environment Variables
 ```
-1. In each service, go to "Variables"
-2. Add:
-   - DATABASE_URL: ${{Postgres.DATABASE_URL}}
-   - REDIS_URL: ${{Redis.REDIS_URL}}
+1. Click on your `api` service. Go to the "Variables" tab.
+2. Add a new variable `DATABASE_URL` → click the "Add Reference" button → select the `DATABASE_URL` from your PostgreSQL service.
+3. Add a new variable `REDIS_URL` → click "Add Reference" → select the `REDIS_URL` from your Redis service.
+4. Add these manual variables:
    - OPENAI_API_KEY: (your API key)
    - ENVIRONMENT: production
    - LOG_LEVEL: INFO
+
+5. Repeat these steps for the `worker` and `beat` services.
 ```
 
 #### 4. Deploy

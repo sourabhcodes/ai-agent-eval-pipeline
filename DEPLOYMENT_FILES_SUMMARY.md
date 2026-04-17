@@ -34,7 +34,7 @@ Your evaluation pipeline is now ready for cloud deployment with complete orchest
 │   ├─ Auto-deploy on Git push
 │   └─ Environment variable mapping
 │
-└── railway.json                  Railway.app one-click deploy
+
     ├─ PostgreSQL database service
     ├─ Redis cache service
     ├─ FastAPI API service
@@ -93,7 +93,7 @@ Your evaluation pipeline is now ready for cloud deployment with complete orchest
 | Aspect | Render | Railway |
 |--------|--------|---------|
 | **Setup Time** | ~10 min | ~10 min |
-| **Config File** | render.yaml | railway.json |
+| **Config File** | render.yaml | (Manual Setup) |
 | **Monthly Cost** | ~$58 | ~$45 |
 | **Scaling** | Manual | ✅ Easy |
 | **CLI** | ✅ Available | ✅ Built-in |
@@ -143,11 +143,9 @@ Your GitHub Repo
         ↓
 4. "Deploy from GitHub"
         ↓
-5. Select repository
-        ↓
-6. Railway detects railway.json
-        ↓
-7. Auto-provisions services
+5. Add Manual Environment Variables
+6. Add Database Plugins
+7. Link Database URL variables
         ↓
 8. Set environment variables
    - POSTGRES_PASSWORD
@@ -227,7 +225,7 @@ Total: ~$45/month
 
 - [ ] **Orchestration Configs**
   - [ ] render.yaml exists and is valid
-  - [ ] railway.json exists and is valid
+
 
 - [ ] **Credentials Ready**
   - [ ] PostgreSQL password generated (strong, 20+ chars)
@@ -267,9 +265,7 @@ git push origin main
 
 # 3. Choose your repository
 
-# 4. Railway auto-detects railway.json
-
-# 5. Configure environment and deploy
+# 4. Railway detects Dockerfile and deploys API
 ```
 
 ---
