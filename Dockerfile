@@ -19,6 +19,10 @@ RUN pip install --no-cache-dir -U pip setuptools wheel && \
 # Copy application code
 COPY . .
 
+# Copy wait-for-postgres script
+COPY wait-for-postgres.sh /app/wait-for-postgres.sh
+RUN chmod +x /app/wait-for-postgres.sh
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -35,8 +39,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 # FastAPI application on port 8000
 EXPOSE 8000
 
-# Run FastAPI with gunicorn for production
-CMD ["gunicorn", "app.main:app", \
+# Run FastAPI with gunicorn for production, waiting for postgres first
+CMD ["/app/wait-for-postgres.sh", "gunicorn", "app.main:app", \
      "--workers", "4", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8000", \

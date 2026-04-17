@@ -19,6 +19,10 @@ RUN pip install --no-cache-dir -U pip setuptools wheel && \
 # Copy application code
 COPY . .
 
+# Copy wait-for-postgres script
+COPY wait-for-postgres.sh /app/wait-for-postgres.sh
+RUN chmod +x /app/wait-for-postgres.sh
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -33,7 +37,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD celery -A app.celery inspect ping -d celery@$HOSTNAME > /dev/null 2>&1 || exit 1
 
 # Celery worker - process evaluation and analysis tasks
-CMD ["celery", "-A", "app.celery", "worker", \
+CMD ["/app/wait-for-postgres.sh", "celery", "-A", "app.celery", "worker", \
      "--loglevel=info", \
      "--concurrency=4", \
      "-Q", "evaluation,analysis", \

@@ -48,14 +48,9 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 # If DATABASE_URL is not set or is a template, use Railway service name
 if not DATABASE_URL or DATABASE_URL.startswith("${"):
     # Try to use Railway's internal postgres service first
-    try:
-        # Check if postgres service is available (Railway networking)
-        DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/eval_pipeline"
-        logger.info(f"Using Railway/Docker service network: {DATABASE_URL}")
-    except Exception:
-        # Fallback to localhost (for local development)
-        DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
-        logger.info(f"Using localhost fallback: {DATABASE_URL}")
+    DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/eval_pipeline"
+    logger.info(f"Using Railway/Docker service network: {DATABASE_URL}")
+    # If postgres hostname doesn't work, fallback will try localhost later
 
 # Redis/Celery configuration
 REDIS_URL = os.getenv("REDIS_URL", "")
