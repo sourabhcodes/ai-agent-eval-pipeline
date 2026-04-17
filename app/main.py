@@ -42,15 +42,8 @@ logger = logging.getLogger(__name__)
 # CONFIGURATION
 # ============================================================================
 
-# Database configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "")
-
-# If DATABASE_URL is not set or is a template, use Railway service name
-if not DATABASE_URL or DATABASE_URL.startswith("${"):
-    # Try to use Railway's internal postgres service first
-    DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/eval_pipeline"
-    logger.info(f"Using Railway/Docker service network: {DATABASE_URL}")
-    # If postgres hostname doesn't work, fallback will try localhost later
+# Database configuration - keep for logging/debugging
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@postgres:5432/eval_pipeline")
 
 # Redis/Celery configuration
 REDIS_URL = os.getenv("REDIS_URL", "")
@@ -62,12 +55,50 @@ if not REDIS_URL or REDIS_URL.startswith("${"):
 # DATABASE SETUP
 # ============================================================================
 
-engine = create_engine(
-    DATABASE_URL,
-    poolclass=NullPool,  # For Celery compatibility
-    echo=False
-)
+engine = None
 
+def get_database_engine():
+    """Create database engine, trying multiple connection strategies."""
+    global engine
+    if engine:
+        return engine
+    
+    database_url = os.getenv("DATABASE_URL", "")
+    
+    # If DATABASE_URL not set or is template, build it
+    if not database_url or database_url.startswith("${"):
+        database_url = "postgresql://postgres:postgres@postgres:5432/eval_pipeline"
+        logger.info(f"Using Railway/Docker service network: {database_url}")
+    
+    try:
+        engine = create_engine(
+            database_url,
+            poolclass=NullPool,  # For Celery compatibility
+            echo=False,
+            connect_args={"connect_timeout": 5}
+        )
+        logger.info(f"✓ Database engine created: {database_url.split('@')[1] if '@' in database_url else 'unknown'}")
+        return engine
+    except Exception as e:
+        logger.error(f"Failed to create engine with {database_url}: {e}")
+        # Try localhost fallback for Railway
+        logger.info("Trying localhost fallback...")
+        database_url = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
+        try:
+            engine = create_engine(
+                database_url,
+                poolclass=NullPool,
+                echo=False,
+                connect_args={"connect_timeout": 5}
+            )
+            logger.info(f"✓ Database engine created with localhost fallback")
+            return engine
+        except Exception as e2:
+            logger.error(f"Failed localhost fallback too: {e2}")
+            raise
+
+# Initialize engine
+engine = get_database_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create tables (optional - may fail during startup if DB not ready)
