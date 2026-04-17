@@ -1,25 +1,10 @@
 # Render.com Deployment Configuration
-# Deploy with: `render deploy`
-# Or use Render Dashboard: https://dashboard.render.com
+# Before deploying:
+# 1. Create PostgreSQL database: https://dashboard.render.com/new/database/postgresql
+# 2. Create Redis cache: https://dashboard.render.com/new/database/redis
+# 3. Copy their connection strings and add to environment variables below
 
 services:
-  # PostgreSQL Database
-  - type: postgresql
-    name: eval-pipeline-postgres
-    plan: starter
-    
-    # Database configuration
-    databaseName: eval_pipeline
-    databaseUser: postgres
-    databasePassword: ${POSTGRES_PASSWORD}
-    postgresSQLVersion: "15"
-    
-  # Redis Cache
-  - type: redis
-    name: eval-pipeline-redis
-    plan: starter
-    redisVersion: "7"
-
   # FastAPI Web Service
   - type: web
     name: eval-pipeline-api
@@ -43,15 +28,9 @@ services:
     # Environment variables
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: postgresql
-          name: eval-pipeline-postgres
-          property: connectionString
+        value: ${DATABASE_URL}
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: eval-pipeline-redis
-          property: connectionString
+        value: ${REDIS_URL}
       - key: OPENAI_API_KEY
         scope: build
         sync: false
@@ -93,15 +72,9 @@ services:
     # Environment variables (same as API)
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: postgresql
-          name: eval-pipeline-postgres
-          property: connectionString
+        value: ${DATABASE_URL}
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: eval-pipeline-redis
-          property: connectionString
+        value: ${REDIS_URL}
       - key: OPENAI_API_KEY
         scope: build
         sync: false
@@ -132,15 +105,9 @@ services:
     # Environment variables (same as API)
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: postgresql
-          name: eval-pipeline-postgres
-          property: connectionString
+        value: ${DATABASE_URL}
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: eval-pipeline-redis
-          property: connectionString
+        value: ${REDIS_URL}
       - key: OPENAI_API_KEY
         scope: build
         sync: false
