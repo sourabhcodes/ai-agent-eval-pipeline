@@ -6,11 +6,7 @@ import os
 from celery import Celery
 
 # Redis/Celery configuration
-REDIS_URL = os.getenv("REDIS_URL", "")
-
-# If REDIS_URL not set or is template, try service hostname first, then fallback
-if not REDIS_URL or REDIS_URL.startswith("${"):
-    REDIS_URL = "redis://redis:6379"  # Try Railway/Docker service name first
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
 # Create Celery app
 celery_app = Celery(
