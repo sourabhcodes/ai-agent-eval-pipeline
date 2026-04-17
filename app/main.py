@@ -45,13 +45,19 @@ logger = logging.getLogger(__name__)
 # Database configuration - keep for logging/debugging
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 if not DATABASE_URL or DATABASE_URL.startswith("${"):
-    _db_host = "postgres" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    if "RAILWAY_ENVIRONMENT" in os.environ or "RAILWAY_PROJECT_ID" in os.environ:
+        _db_host = "postgres.railway.internal"
+    else:
+        _db_host = "postgres" if os.getenv("ENVIRONMENT") == "production" else "localhost"
     DATABASE_URL = f"postgresql://postgres:postgres@{_db_host}:5432/eval_pipeline"
 
 # Redis/Celery configuration
 REDIS_URL = os.getenv("REDIS_URL", "")
 if not REDIS_URL or REDIS_URL.startswith("${"):
-    _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    if "RAILWAY_ENVIRONMENT" in os.environ or "RAILWAY_PROJECT_ID" in os.environ:
+        _redis_host = "redis.railway.internal"
+    else:
+        _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
     REDIS_URL = f"redis://{_redis_host}:6379"
 
 # ============================================================================

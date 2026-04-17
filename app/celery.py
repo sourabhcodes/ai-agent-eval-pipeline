@@ -8,7 +8,10 @@ from celery import Celery
 # Redis/Celery configuration
 REDIS_URL = os.getenv("REDIS_URL", "")
 if not REDIS_URL or REDIS_URL.startswith("${"):
-    _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    if "RAILWAY_ENVIRONMENT" in os.environ or "RAILWAY_PROJECT_ID" in os.environ:
+        _redis_host = "redis.railway.internal"
+    else:
+        _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
     REDIS_URL = f"redis://{_redis_host}:6379"
 
 # Create Celery app
