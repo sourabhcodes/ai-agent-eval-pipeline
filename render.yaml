@@ -8,92 +8,47 @@ services:
   # FastAPI Web Service
   - type: web
     name: eval-pipeline-api
-    runtime: docker
-    plan: starter
-    
-    # Docker build
     dockerfile: ./Dockerfile
-    dockerCommand: |
-      gunicorn app.main:app \
-        --workers 4 \
-        --worker-class uvicorn.workers.UvicornWorker \
-        --bind 0.0.0.0:8000 \
-        --max-requests 1000 \
-        --timeout 60
-    
-    # Environment variables
     envVars:
       - key: DATABASE_URL
         value: ${DATABASE_URL}
       - key: REDIS_URL
         value: ${REDIS_URL}
       - key: OPENAI_API_KEY
-        scope: build
-        sync: false
+        value: ${OPENAI_API_KEY}
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
         value: INFO
-    
-    # Health check
-    healthCheckPath: /health
-    healthCheckInterval: 30
-    
-    # Auto-deploy on push
-    autoDeploy: true
-    
-    # Custom domain (optional)
-    # customDomains:
-    #   - eval-pipeline.onrender.com
 
   # Celery Worker Service
   - type: worker
     name: eval-pipeline-worker
-    runtime: docker
-    
-    # Docker build
     dockerfile: ./worker.dockerfile
-    startCommand: celery -A app.celery worker --loglevel=info --concurrency=4 -Q evaluation,analysis --max-tasks-per-child=1000 --time-limit=1800
-    
-    # Environment variables (same as API)
     envVars:
       - key: DATABASE_URL
         value: ${DATABASE_URL}
       - key: REDIS_URL
         value: ${REDIS_URL}
       - key: OPENAI_API_KEY
-        scope: build
-        sync: false
+        value: ${OPENAI_API_KEY}
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
         value: INFO
-    
-    # Auto-deploy on push
-    autoDeploy: true
 
   # Celery Beat Scheduler
   - type: worker
     name: eval-pipeline-beat
-    runtime: docker
-    
-    # Docker build
-    dockerfile: ./worker.dockerfile
-    startCommand: celery -A app.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    
-    # Environment variables (same as API)
+    dockerfile: ./beat.dockerfile
     envVars:
       - key: DATABASE_URL
         value: ${DATABASE_URL}
       - key: REDIS_URL
         value: ${REDIS_URL}
       - key: OPENAI_API_KEY
-        scope: build
-        sync: false
+        value: ${OPENAI_API_KEY}
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
         value: INFO
-    
-    # Auto-deploy on push
-    autoDeploy: true
