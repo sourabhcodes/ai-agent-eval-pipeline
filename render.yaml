@@ -30,9 +30,9 @@ services:
     runtime: docker
     envVars:
       - key: DATABASE_URL
-        value: "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
+        value: "postgresql://user:password@host:5432/dbname"
       - key: REDIS_URL
-        value: "redis://localhost:6379"
+        value: "redis://default:password@host:10000"
       - key: OPENAI_API_KEY
         value: "sk-change-me-after-deploy"
       - key: ENVIRONMENT

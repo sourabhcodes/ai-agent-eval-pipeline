@@ -80,21 +80,48 @@ def get_database_engine():
         logger.error(f"Failed to create engine: {e}")
         raise
 
-# Initialize engine
-engine = get_database_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Initialize engine (lazy - try but don't crash if DB not available)
+engine = None
+SessionLocal = None
 
-# Create tables (optional - may fail during startup if DB not ready)
-try:
-    Base.metadata.create_all(bind=engine)
-    logger.info("✓ Database tables created successfully")
-except Exception as e:
-    logger.warning(f"⚠ Could not create tables on startup (DB may not be ready yet): {e}")
-    # Tables will be created on first request or later
+def init_db():
+    """Initialize database engine and create tables if needed."""
+    global engine, SessionLocal
+    if engine is not None:
+        return engine
+    
+    try:
+        engine = get_database_engine()
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        
+        # Try to create tables
+        try:
+            Base.metadata.create_all(bind=engine)
+            logger.info("✓ Database tables created successfully")
+        except Exception as e:
+            logger.warning(f"⚠ Could not create tables: {e}")
+        
+        return engine
+    except Exception as e:
+        logger.error(f"✗ Database initialization failed: {e}")
+        return None
+
+# Defer initialization - don't block startup
+logger.info("Database initialization deferred to first request")
 
 
 def get_db() -> Session:
     """Dependency to get database session."""
+    # Ensure DB is initialized
+    if SessionLocal is None:
+        init_db()
+    
+    if SessionLocal is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Database not available. Please try again later."
+        )
+    
     db = SessionLocal()
     try:
         yield db
@@ -284,7 +311,38 @@ def analyze_and_suggest_task(
 @app.get("/health")
 def health_check() -> dict:
     """Health check endpoint."""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    db_status = "unknown"
+    redis_status = "unknown"
+    
+    # Check database
+    try:
+        if SessionLocal is None:
+            init_db()
+        if SessionLocal is not None:
+            db = SessionLocal()
+            db.execute("SELECT 1")
+            db.close()
+            db_status = "healthy"
+        else:
+            db_status = "unavailable"
+    except Exception as e:
+        db_status = f"error: {str(e)[:50]}"
+    
+    # Check Redis (just try to import and connect)
+    try:
+        from redis import Redis
+        r = Redis.from_url(REDIS_URL, socket_connect_timeout=2)
+        r.ping()
+        redis_status = "healthy"
+    except Exception as e:
+        redis_status = f"error: {str(e)[:50]}"
+    
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "database": db_status,
+        "redis": redis_status
+    }
 
 
 @app.post("/ingest")
@@ -715,6 +773,14 @@ async def startup_event():
     logger.info("🚀 Evaluation Pipeline starting up")
     logger.info(f"Database: {DATABASE_URL}")
     logger.info(f"Redis/Celery: {REDIS_URL}")
+    
+    # Try to initialize database (non-blocking)
+    try:
+        init_db()
+        logger.info("✓ Database initialized successfully")
+    except Exception as e:
+        logger.warning(f"⚠ Database not ready yet (will retry on first request): {e}")
+        logger.info("ℹ App will continue starting and retry database initialization when needed")
 
 
 @app.on_event("shutdown")

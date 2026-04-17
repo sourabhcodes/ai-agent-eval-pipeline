@@ -52,8 +52,8 @@
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/eval_pipeline",
-        "REDIS_URL": "redis://localhost:6379",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",
         "LOG_LEVEL": "INFO",
@@ -80,8 +80,8 @@
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/eval_pipeline",
-        "REDIS_URL": "redis://localhost:6379",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",
         "LOG_LEVEL": "INFO",
@@ -96,8 +96,8 @@
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/eval_pipeline",
-        "REDIS_URL": "redis://localhost:6379",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",
         "LOG_LEVEL": "INFO",
