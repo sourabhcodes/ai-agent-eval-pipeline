@@ -59,13 +59,12 @@
         "LOG_LEVEL": "INFO",
         "PYTHONUNBUFFERED": "1"
       },
-      "depends_on": ["postgres", "redis"],
       "healthCheck": {
         "test": ["CMD", "curl", "-f", "http://localhost:8000/health"],
         "interval": 30,
         "timeout": 10,
         "retries": 3,
-        "start_period": 10
+        "start_period": 30
       },
       "ports": {
         "8000": {
@@ -88,7 +87,6 @@
         "LOG_LEVEL": "INFO",
         "PYTHONUNBUFFERED": "1"
       },
-      "depends_on": ["postgres", "redis"],
       "restart": "always",
       "scale": 2
     },
@@ -105,7 +103,6 @@
         "LOG_LEVEL": "INFO",
         "PYTHONUNBUFFERED": "1"
       },
-      "depends_on": ["postgres", "redis"],
       "restart": "always",
       "scale": 1
     }
