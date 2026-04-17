@@ -6,7 +6,10 @@ import os
 from celery import Celery
 
 # Redis/Celery configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+REDIS_URL = os.getenv("REDIS_URL", "")
+if not REDIS_URL or REDIS_URL.startswith("${"):
+    _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    REDIS_URL = f"redis://{_redis_host}:6379"
 
 # Create Celery app
 celery_app = Celery(

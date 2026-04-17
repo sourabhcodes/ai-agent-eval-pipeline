@@ -43,10 +43,16 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 
 # Database configuration - keep for logging/debugging
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/eval_pipeline")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+if not DATABASE_URL or DATABASE_URL.startswith("${"):
+    _db_host = "postgres" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    DATABASE_URL = f"postgresql://postgres:postgres@{_db_host}:5432/eval_pipeline"
 
 # Redis/Celery configuration
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+REDIS_URL = os.getenv("REDIS_URL", "")
+if not REDIS_URL or REDIS_URL.startswith("${"):
+    _redis_host = "redis" if os.getenv("ENVIRONMENT") == "production" else "localhost"
+    REDIS_URL = f"redis://{_redis_host}:6379"
 
 # ============================================================================
 # DATABASE SETUP
@@ -60,12 +66,8 @@ def get_database_engine():
     if engine:
         return engine
     
-    database_url = os.getenv("DATABASE_URL", "")
-    
-    # If DATABASE_URL not set or is template, use localhost (Railway compatible)
-    if not database_url or database_url.startswith("${"):
-        database_url = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
-        logger.info(f"Using localhost database: {database_url.split('@')[1]}")
+    database_url = DATABASE_URL
+    logger.info(f"Using database: {database_url.split('@')[1] if '@' in database_url else database_url}")
     
     try:
         engine = create_engine(
