@@ -33,6 +33,6 @@ RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Celery beat scheduler - schedules periodic evaluation tasks
-CMD ["/app/wait-for-postgres.sh", "celery", "-A", "app.celery", "beat", \
+CMD ["/bin/bash", "/app/wait-for-postgres.sh", "celery", "-A", "app.celery", "beat", \
      "--loglevel=info", \
      "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]

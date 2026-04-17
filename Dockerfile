@@ -40,7 +40,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 EXPOSE 8000
 
 # Run FastAPI with gunicorn for production, waiting for postgres first
-CMD ["/app/wait-for-postgres.sh", "gunicorn", "app.main:app", \
+CMD ["/bin/bash", "/app/wait-for-postgres.sh", "gunicorn", "app.main:app", \
      "--workers", "4", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8000", \

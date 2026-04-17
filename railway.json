@@ -6,24 +6,27 @@
       "image": "postgres:15-alpine",
       "environment": {
         "POSTGRES_USER": "postgres",
-        "POSTGRES_PASSWORD": "$POSTGRES_PASSWORD",
-        "POSTGRES_DB": "eval_pipeline"
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_DB": "eval_pipeline",
+        "POSTGRES_INITDB_ARGS": "-c shared_buffers=256MB -c max_connections=200"
       },
       "volumes": {
         "postgres_data": "/var/lib/postgresql/data"
       },
       "healthCheck": {
         "test": ["CMD-SHELL", "pg_isready -U postgres"],
-        "interval": 10,
-        "timeout": 5,
-        "retries": 5
+        "interval": 5,
+        "timeout": 3,
+        "retries": 10,
+        "start_period": 15
       },
       "ports": {
         "5432": {
           "expose": true,
           "protocol": "tcp"
         }
-      }
+      },
+      "restart": "always"
     },
     "redis": {
       "image": "redis:7-alpine",

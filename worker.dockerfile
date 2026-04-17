@@ -37,7 +37,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD celery -A app.celery inspect ping -d celery@$HOSTNAME > /dev/null 2>&1 || exit 1
 
 # Celery worker - process evaluation and analysis tasks
-CMD ["/app/wait-for-postgres.sh", "celery", "-A", "app.celery", "worker", \
+CMD ["/bin/bash", "/app/wait-for-postgres.sh", "celery", "-A", "app.celery", "worker", \
      "--loglevel=info", \
      "--concurrency=4", \
      "-Q", "evaluation,analysis", \
