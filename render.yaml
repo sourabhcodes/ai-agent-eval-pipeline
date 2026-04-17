@@ -11,10 +11,6 @@ services:
     runtime: docker
     plan: starter
     
-    # Source code
-    repo: ${REPO_URL}
-    branch: ${BRANCH}
-    
     # Docker build
     dockerfile: ./Dockerfile
     dockerCommand: |
@@ -55,10 +51,6 @@ services:
     name: eval-pipeline-worker
     runtime: docker
     
-    # Source code
-    repo: ${REPO_URL}
-    branch: ${BRANCH}
-    
     # Docker build
     dockerfile: ./worker.dockerfile
     dockerCommand: |
@@ -91,10 +83,6 @@ services:
     name: eval-pipeline-beat
     runtime: docker
     
-    # Source code
-    repo: ${REPO_URL}
-    branch: ${BRANCH}
-    
     # Docker build
     dockerfile: ./worker.dockerfile
     dockerCommand: |
@@ -118,9 +106,3 @@ services:
     
     # Auto-deploy on push
     autoDeploy: true
-
-# Cron jobs (optional - use Render Cron Job service for additional tasks)
-crons:
-  - name: health-check
-    schedule: "*/30 * * * *"  # Every 30 minutes
-    command: curl -f https://${API_DOMAIN}/health || exit 1
