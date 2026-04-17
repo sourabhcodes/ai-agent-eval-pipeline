@@ -4,37 +4,21 @@
 
 services:
   # PostgreSQL Database
-  - type: pserv
+  - type: postgresql
     name: eval-pipeline-postgres
-    runtime: python_psycopg2
     plan: starter
-    ipAllowList: []
     
     # Database configuration
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: eval_pipeline
-    
-    # Volume for persistent data
-    volumes:
-      - name: postgres_data
-        mountPath: /var/lib/postgresql/data
-        ephemeral: false
-    
-    # Health check
-    healthCheckPath: /
+    databaseName: eval_pipeline
+    databaseUser: postgres
+    databasePassword: ${POSTGRES_PASSWORD}
+    postgresSQLVersion: "15"
     
   # Redis Cache
-  - type: rserv
+  - type: redis
     name: eval-pipeline-redis
-    runtime: redis
     plan: starter
-    ipAllowList: []
-    
-    # Redis configuration
-    env:
-      REDIS_URL: redis://localhost:6379
+    redisVersion: "7"
 
   # FastAPI Web Service
   - type: web
@@ -60,12 +44,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromService:
-          type: pserv
+          type: postgresql
           name: eval-pipeline-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: rserv
+          type: redis
           name: eval-pipeline-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -110,12 +94,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromService:
-          type: pserv
+          type: postgresql
           name: eval-pipeline-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: rserv
+          type: redis
           name: eval-pipeline-redis
           property: connectionString
       - key: OPENAI_API_KEY
@@ -149,12 +133,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromService:
-          type: pserv
+          type: postgresql
           name: eval-pipeline-postgres
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: rserv
+          type: redis
           name: eval-pipeline-redis
           property: connectionString
       - key: OPENAI_API_KEY
