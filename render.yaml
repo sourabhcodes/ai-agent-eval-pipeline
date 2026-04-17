@@ -1,46 +1,16 @@
 # Render.com Deployment Configuration
-# Before deploying:
-# 1. Create PostgreSQL database: https://dashboard.render.com/new/database/postgresql
-# 2. Create Redis cache: https://dashboard.render.com/new/database/redis
-# 3. Copy their connection strings and add to environment variables below
+# 
+# This Blueprint deploys the FastAPI web service.
+# For full deployment, you'll also need to:
+# 1. Create PostgreSQL database manually: https://dashboard.render.com/new/database/postgresql
+# 2. Create Redis cache manually: https://dashboard.render.com/new/database/redis
+# 3. Deploy worker services separately (see DEPLOY.md for instructions)
 
 services:
   # FastAPI Web Service
   - type: web
     name: eval-pipeline-api
-    dockerfile: ./Dockerfile
-    envVars:
-      - key: DATABASE_URL
-        value: ${DATABASE_URL}
-      - key: REDIS_URL
-        value: ${REDIS_URL}
-      - key: OPENAI_API_KEY
-        value: ${OPENAI_API_KEY}
-      - key: ENVIRONMENT
-        value: production
-      - key: LOG_LEVEL
-        value: INFO
-
-  # Celery Worker Service
-  - type: worker
-    name: eval-pipeline-worker
-    dockerfile: ./worker.dockerfile
-    envVars:
-      - key: DATABASE_URL
-        value: ${DATABASE_URL}
-      - key: REDIS_URL
-        value: ${REDIS_URL}
-      - key: OPENAI_API_KEY
-        value: ${OPENAI_API_KEY}
-      - key: ENVIRONMENT
-        value: production
-      - key: LOG_LEVEL
-        value: INFO
-
-  # Celery Beat Scheduler
-  - type: worker
-    name: eval-pipeline-beat
-    dockerfile: ./beat.dockerfile
+    runtime: docker
     envVars:
       - key: DATABASE_URL
         value: ${DATABASE_URL}
