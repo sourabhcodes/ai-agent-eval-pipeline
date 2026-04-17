@@ -30,6 +30,15 @@ from app.evaluators import (
 from app.self_updater import SelfUpdatingService
 
 # ============================================================================
+# LOGGING SETUP (must be first)
+# ============================================================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+# ============================================================================
 # CONFIGURATION
 # ============================================================================
 
@@ -53,13 +62,6 @@ REDIS_URL = os.getenv("REDIS_URL", "")
 if not REDIS_URL or REDIS_URL.startswith("${"):
     REDIS_URL = "redis://redis:6379"  # Railway service name
     logger.info(f"Using Redis service: {REDIS_URL}")
-
-# Logging setup
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 # ============================================================================
 # DATABASE SETUP
