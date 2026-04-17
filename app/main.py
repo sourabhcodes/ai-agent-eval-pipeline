@@ -359,7 +359,7 @@ def ingest_batch(
                 user_id=conv_data.user_id,
                 agent_id=conv_data.agent_id,
                 title=conv_data.title,
-                metadata=conv_data.metadata or {}
+                meta=conv_data.meta or {}
             )
             
             # Add turns
@@ -368,7 +368,7 @@ def ingest_batch(
                     role=turn_data.role,
                     content=turn_data.content,
                     tool_calls=turn_data.tool_calls or [],
-                    metadata=turn_data.metadata or {}
+                    meta=turn_data.meta or {}
                 )
                 db_conversation.turns.append(db_turn)
             

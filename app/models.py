@@ -83,7 +83,7 @@ class Turn(Base):
     role = Column(SQLEnum(RoleEnum), nullable=False)
     content = Column(Text, nullable=False)
     tool_calls = Column(JSON, nullable=True, default=[])  # For tracking tool calls
-    metadata = Column(JSON, nullable=True, default={})
+    meta = Column(JSON, nullable=True, default={})
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -234,7 +234,7 @@ class ConversationRead(ConversationBase):
 class ConversationUpdate(BaseModel):
     """Schema for updating a Conversation."""
     title: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = None
 
 
 # Convenience schemas for batch operations
@@ -244,7 +244,7 @@ class ConversationWithTurnsCreate(BaseModel):
     user_id: str
     agent_id: str
     title: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = None
     turns: List[TurnCreate] = Field(default_factory=list)
 
 
