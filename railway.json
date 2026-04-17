@@ -49,7 +49,7 @@
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
         "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",
@@ -78,7 +78,7 @@
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
         "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",
@@ -91,11 +91,11 @@
     },
     "beat": {
       "build": {
-        "dockerfile": "./worker.dockerfile",
+        "dockerfile": "./beat.dockerfile",
         "context": "."
       },
       "environment": {
-        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "DATABASE_URL": "postgresql://postgres:postgres@postgres:5432/eval_pipeline",
         "REDIS_URL": "redis://redis:6379",
         "OPENAI_API_KEY": "$OPENAI_API_KEY",
         "ENVIRONMENT": "production",

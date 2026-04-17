@@ -1,10 +1,27 @@
 # Render.com Deployment Configuration
 # 
 # This Blueprint deploys the FastAPI web service.
-# For full deployment, you'll also need to:
-# 1. Create PostgreSQL database manually: https://dashboard.render.com/new/database/postgresql
-# 2. Create Redis cache manually: https://dashboard.render.com/new/database/redis
-# 3. Deploy worker services separately (see DEPLOY.md for instructions)
+# 
+# IMPORTANT: Manual Setup Required
+# Before deploying:
+# 1. Go to Render Dashboard: https://dashboard.render.com/new/database/postgresql
+#    - Create PostgreSQL database
+#    - Copy the connection string (database.example.com)
+#    - Note the password
+# 2. Go to Render Dashboard: https://dashboard.render.com/new/database/redis
+#    - Create Redis cache
+#    - Copy the connection string (redis://...)
+# 3. Get OpenAI API key from https://platform.openai.com/api-keys
+# 
+# After deploying this Blueprint:
+# 1. Go to your FastAPI service in Render
+# 2. Click "Environment"
+# 3. Add these environment variables with your actual values:
+#    - DATABASE_URL: postgresql://user:password@host:5432/dbname
+#    - REDIS_URL: redis://default:password@host:10000
+#    - OPENAI_API_KEY: sk-your-api-key
+#
+# For now, set temporary defaults (they'll override at runtime):
 
 services:
   # FastAPI Web Service
@@ -13,11 +30,11 @@ services:
     runtime: docker
     envVars:
       - key: DATABASE_URL
-        value: ${DATABASE_URL}
+        value: "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
       - key: REDIS_URL
-        value: ${REDIS_URL}
+        value: "redis://localhost:6379"
       - key: OPENAI_API_KEY
-        value: ${OPENAI_API_KEY}
+        value: "sk-change-me-after-deploy"
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL

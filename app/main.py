@@ -34,13 +34,16 @@ from app.self_updater import SelfUpdatingService
 # ============================================================================
 
 # Database configuration
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+
+# If DATABASE_URL is not set or is a template, use default
+if not DATABASE_URL or DATABASE_URL.startswith("${"):
+    DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/eval_pipeline"
 
 # Redis/Celery configuration
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+if REDIS_URL.startswith("${"):
+    REDIS_URL = "redis://localhost:6379"
 
 # Logging setup
 logging.basicConfig(
