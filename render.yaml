@@ -53,13 +53,7 @@ services:
     
     # Docker build
     dockerfile: ./worker.dockerfile
-    dockerCommand: |
-      celery -A app.celery worker \
-        --loglevel=info \
-        --concurrency=4 \
-        -Q evaluation,analysis \
-        --max-tasks-per-child=1000 \
-        --time-limit=1800
+    startCommand: celery -A app.celery worker --loglevel=info --concurrency=4 -Q evaluation,analysis --max-tasks-per-child=1000 --time-limit=1800
     
     # Environment variables (same as API)
     envVars:
@@ -85,10 +79,7 @@ services:
     
     # Docker build
     dockerfile: ./worker.dockerfile
-    dockerCommand: |
-      celery -A app.celery beat \
-        --loglevel=info \
-        --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    startCommand: celery -A app.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     
     # Environment variables (same as API)
     envVars:
