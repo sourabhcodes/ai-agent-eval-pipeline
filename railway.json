@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "app": "eval-pipeline",
+  "services": {
+    "postgres": {
+      "image": "postgres:15-alpine",
+      "environment": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "$POSTGRES_PASSWORD",
+        "POSTGRES_DB": "eval_pipeline"
+      },
+      "volumes": {
+        "postgres_data": "/var/lib/postgresql/data"
+      },
+      "healthCheck": {
+        "test": ["CMD-SHELL", "pg_isready -U postgres"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 5
+      },
+      "ports": {
+        "5432": {
+          "expose": true,
+          "protocol": "tcp"
+        }
+      }
+    },
+    "redis": {
+      "image": "redis:7-alpine",
+      "volumes": {
+        "redis_data": "/data"
+      },
+      "healthCheck": {
+        "test": ["CMD", "redis-cli", "ping"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 5
+      },
+      "ports": {
+        "6379": {
+          "expose": true,
+          "protocol": "tcp"
+        }
+      }
+    },
+    "api": {
+      "build": {
+        "dockerfile": "./Dockerfile",
+        "context": "."
+      },
+      "environment": {
+        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
+        "OPENAI_API_KEY": "$OPENAI_API_KEY",
+        "ENVIRONMENT": "production",
+        "LOG_LEVEL": "INFO",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "depends_on": ["postgres", "redis"],
+      "healthCheck": {
+        "test": ["CMD", "curl", "-f", "http://localhost:8000/health"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "start_period": 10
+      },
+      "ports": {
+        "8000": {
+          "expose": true,
+          "protocol": "http"
+        }
+      },
+      "restart": "always"
+    },
+    "worker": {
+      "build": {
+        "dockerfile": "./worker.dockerfile",
+        "context": "."
+      },
+      "environment": {
+        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
+        "OPENAI_API_KEY": "$OPENAI_API_KEY",
+        "ENVIRONMENT": "production",
+        "LOG_LEVEL": "INFO",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "depends_on": ["postgres", "redis"],
+      "restart": "always",
+      "scale": 2
+    },
+    "beat": {
+      "build": {
+        "dockerfile": "./worker.dockerfile",
+        "context": "."
+      },
+      "environment": {
+        "DATABASE_URL": "postgresql://postgres:$POSTGRES_PASSWORD@postgres:5432/eval_pipeline",
+        "REDIS_URL": "redis://redis:6379",
+        "OPENAI_API_KEY": "$OPENAI_API_KEY",
+        "ENVIRONMENT": "production",
+        "LOG_LEVEL": "INFO",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "depends_on": ["postgres", "redis"],
+      "restart": "always",
+      "scale": 1
+    }
+  },
+  "volumes": {
+    "postgres_data": {
+      "driver": "local"
+    },
+    "redis_data": {
+      "driver": "local"
+    }
+  },
+  "networks": {
+    "default": {
+      "driver": "bridge"
+    }
+  }
+}

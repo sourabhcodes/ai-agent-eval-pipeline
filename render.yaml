@@ -1,0 +1,175 @@
+# Render.com Deployment Configuration
+# Deploy with: `render deploy`
+# Or use Render Dashboard: https://dashboard.render.com
+
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: eval-pipeline-postgres
+    runtime: python_psycopg2
+    plan: starter
+    ipAllowList: []
+    
+    # Database configuration
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: eval_pipeline
+    
+    # Volume for persistent data
+    volumes:
+      - name: postgres_data
+        mountPath: /var/lib/postgresql/data
+        ephemeral: false
+    
+    # Health check
+    healthCheckPath: /
+    
+  # Redis Cache
+  - type: rserv
+    name: eval-pipeline-redis
+    runtime: redis
+    plan: starter
+    ipAllowList: []
+    
+    # Redis configuration
+    env:
+      REDIS_URL: redis://localhost:6379
+
+  # FastAPI Web Service
+  - type: web
+    name: eval-pipeline-api
+    runtime: docker
+    plan: starter
+    
+    # Source code
+    repo: ${REPO_URL}
+    branch: ${BRANCH}
+    
+    # Docker build
+    dockerfile: ./Dockerfile
+    dockerCommand: |
+      gunicorn app.main:app \
+        --workers 4 \
+        --worker-class uvicorn.workers.UvicornWorker \
+        --bind 0.0.0.0:8000 \
+        --max-requests 1000 \
+        --timeout 60
+    
+    # Environment variables
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: eval-pipeline-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: rserv
+          name: eval-pipeline-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        scope: build
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+    
+    # Health check
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    
+    # Auto-deploy on push
+    autoDeploy: true
+    
+    # Custom domain (optional)
+    # customDomains:
+    #   - eval-pipeline.onrender.com
+
+  # Celery Worker Service
+  - type: background
+    name: eval-pipeline-worker
+    runtime: docker
+    
+    # Source code
+    repo: ${REPO_URL}
+    branch: ${BRANCH}
+    
+    # Docker build
+    dockerfile: ./worker.dockerfile
+    dockerCommand: |
+      celery -A app.celery worker \
+        --loglevel=info \
+        --concurrency=4 \
+        -Q evaluation,analysis \
+        --max-tasks-per-child=1000 \
+        --time-limit=1800
+    
+    # Environment variables (same as API)
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: eval-pipeline-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: rserv
+          name: eval-pipeline-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        scope: build
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+    
+    # Auto-deploy on push
+    autoDeploy: true
+
+  # Celery Beat Scheduler
+  - type: background
+    name: eval-pipeline-beat
+    runtime: docker
+    
+    # Source code
+    repo: ${REPO_URL}
+    branch: ${BRANCH}
+    
+    # Docker build
+    dockerfile: ./worker.dockerfile
+    dockerCommand: |
+      celery -A app.celery beat \
+        --loglevel=info \
+        --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    
+    # Environment variables (same as API)
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: eval-pipeline-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: rserv
+          name: eval-pipeline-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        scope: build
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+    
+    # Auto-deploy on push
+    autoDeploy: true
+
+# Cron jobs (optional - use Render Cron Job service for additional tasks)
+crons:
+  - name: health-check
+    schedule: "*/30 * * * *"  # Every 30 minutes
+    command: curl -f https://${API_DOMAIN}/health || exit 1
