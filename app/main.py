@@ -285,7 +285,7 @@ def ingest_conversation(
             user_id=conversation.user_id,
             agent_id=conversation.agent_id,
             title=conversation.title,
-            metadata=conversation.metadata or {}
+            meta=conversation.meta or {}
         )
         
         # Add turns
@@ -294,7 +294,7 @@ def ingest_conversation(
                 role=turn_data.role,
                 content=turn_data.content,
                 tool_calls=turn_data.tool_calls or [],
-                metadata=turn_data.metadata or {}
+                meta=turn_data.meta or {}
             )
             db_conversation.turns.append(db_turn)
         

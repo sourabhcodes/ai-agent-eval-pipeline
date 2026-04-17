@@ -101,14 +101,14 @@ def scenario_1_date_format_errors() -> bool:
                 user_id=f"test_user_s1_{idx}",
                 agent_id="flight_agent_v1",
                 title=f"Flight Search with Date: {bad_date}",
-                metadata={"scenario": "date_format_error"}
+                meta={"scenario": "date_format_error"}
             )
             
             # User asks for flight
             turn1 = Turn(
                 role=RoleEnum.USER,
                 content=f"Find me flights from NYC to LA on {bad_date}",
-                metadata={}
+                meta={}
             )
             conv.turns.append(turn1)
             
@@ -126,7 +126,7 @@ def scenario_1_date_format_errors() -> bool:
                         }
                     }
                 ],
-                metadata={}
+                meta={}
             )
             conv.turns.append(turn2)
             
@@ -207,14 +207,14 @@ def scenario_2_context_loss_detection() -> bool:
             user_id="test_user_s2",
             agent_id="travel_agent_v1",
             title="Travel Booking - Context Loss",
-            metadata={"scenario": "context_loss"}
+            meta={"scenario": "context_loss"}
         )
         
         # Turn 1: User states clear preference
         turn1 = Turn(
             role=RoleEnum.USER,
             content="I'm looking for flights to Paris. Important: I have a tight budget, so I prefer budget airlines only. Price is my main concern.",
-            metadata={"importance": "high"}
+            meta={"importance": "high"}
         )
         conv.turns.append(turn1)
         
@@ -222,7 +222,7 @@ def scenario_2_context_loss_detection() -> bool:
         turn2 = Turn(
             role=RoleEnum.ASSISTANT,
             content="I'll help you find budget flights to Paris.",
-            metadata={}
+            meta={}
         )
         conv.turns.append(turn2)
         
@@ -230,7 +230,7 @@ def scenario_2_context_loss_detection() -> bool:
         turn3 = Turn(
             role=RoleEnum.USER,
             content="What are the options?",
-            metadata={}
+            meta={}
         )
         conv.turns.append(turn3)
         
@@ -238,7 +238,7 @@ def scenario_2_context_loss_detection() -> bool:
         turn4 = Turn(
             role=RoleEnum.ASSISTANT,
             content="I found several flights. There are economy options with EasyJet and Ryanair. There are also some nice mid-range Air France flights available.",
-            metadata={}
+            meta={}
         )
         conv.turns.append(turn4)
         
@@ -246,7 +246,7 @@ def scenario_2_context_loss_detection() -> bool:
         turn5 = Turn(
             role=RoleEnum.USER,
             content="Remind me, which one is cheapest?",
-            metadata={}
+            meta={}
         )
         conv.turns.append(turn5)
         
@@ -254,7 +254,7 @@ def scenario_2_context_loss_detection() -> bool:
         turn6 = Turn(
             role=RoleEnum.ASSISTANT,
             content="The best option is the Air France premium business class with extra legroom and meals included. It's the most comfortable and has excellent service.",
-            metadata={"context_loss": "ignored_budget_preference"}
+            meta={"context_loss": "ignored_budget_preference"}
         )
         conv.turns.append(turn6)
         
@@ -348,7 +348,7 @@ def scenario_3_annotator_disagreement() -> bool:
                 user_id=f"test_user_s3_{test_case['name'].replace(' ', '_')}",
                 agent_id="eval_agent_v1",
                 title=f"Disagreement Test: {test_case['name']}",
-                metadata={"scenario": "annotator_disagreement"}
+                meta={"scenario": "annotator_disagreement"}
             )
             
             # Add simple turn

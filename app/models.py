@@ -57,7 +57,7 @@ class Conversation(Base):
     user_id = Column(String, nullable=False, index=True)
     agent_id = Column(String, nullable=False)
     title = Column(String, nullable=True)
-    metadata = Column(JSON, nullable=True, default={})
+    meta = Column(JSON, nullable=True, default={})
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -145,7 +145,7 @@ class TurnBase(BaseModel):
     role: RoleEnum
     content: str
     tool_calls: Optional[List[Dict[str, Any]]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = None
 
 
 class TurnCreate(TurnBase):
@@ -211,7 +211,7 @@ class ConversationBase(BaseModel):
     user_id: str
     agent_id: str
     title: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = None
 
 
 class ConversationCreate(ConversationBase):
